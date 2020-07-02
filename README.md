@@ -9,6 +9,20 @@ Explore US Bikeshare Data
 * Managed and computed statistics of datasets via Pandas library
 * An interactive environment where the users may view requested data.
 
+### Installation
+
+Command line execution:
+*example in python3*
+‘‘‘
+  $ python3 bikeshare.py
+’’’
+
+### Libraries & Modules Requirements
+**Numpy**
+**Pandas**
+**time**
+**collections, Counter**
+
 ### Files used :file_folder:
 *new_york_city.csv, chicago.csv, washington.csv*
 
