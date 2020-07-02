@@ -31,7 +31,6 @@ def get_filters(month_list, day_list):
         citydict[keys] = names
     
     city = ""
-    
     while city == "":
         city_input = input("What city/cities would you like to view? \n").lower()
         
@@ -56,15 +55,13 @@ def get_filters(month_list, day_list):
         month_input = input("What month(s) would you like to view? (January to June)\n").lower().replace(" ", "").split(",")
 
         if "all" in month_input:
-            month.append("all")
-            
+            month.append("all")   
         else:
             for m in month_input:
                 try:
                     month.extend([month_list[i] for i in range(len(month_list)) if m in month_list[i]])
                 except:
                     print('Please choose from January through June, or "all".')
-                    raise
                     
     print("You chose:", month)
     time.sleep(0.5)
@@ -75,14 +72,12 @@ def get_filters(month_list, day_list):
         
         if "all" in day_input:
             day.append("all") 
-        
         else:
             for d in day_input:
                 try:
                     day.extend([day_list[i] for i in range(len(day_list)) if d in day_list[i]])
                 except:
-                    print('Please choose from Monday through Sunday, or "all".')
-                    raise
+                    print('Please choose from Monday through Sunday, or "all".')            
         
     print("You chose:", day)
     print('-'*40)
@@ -120,6 +115,7 @@ def load_data(city, month, day, month_list, day_list):
                 all(df[col].isna())
             except:
                 print("{} column has {} NaN".format(col, df[col].isna().sum().sum()))
+
     print("Processing Data...")
     time.sleep(3)
     
@@ -190,20 +186,17 @@ def station_stats(df):
         combo = ' - '.join(combo)
         combo_list.append(combo)
     combo_series = pd.Series(dict(Counter(combo_list))).sort_values(ascending=False)
-    
-    # TO DO: display most commonly used start station
+       
     print("Top used start station =>  {}  ({} out of {})".format(
         start_stations.index[0],
         int(start_stations.max()),
         int(start_stations.values.sum())))
 
-    # TO DO: display most commonly used end station
     print("Top used end station =>  {}  ({} out of {})".format(
         end_stations.index[0],
         int(end_stations.max()),
         int(end_stations.values.sum())))
 
-    # TO DO: display most frequent combination of start station and end station trip
     print("Top used combination of start/end stations =>  {}  ({} out of {})".format(
         combo_series.index[0],
         int(combo_series.max()),
@@ -214,6 +207,7 @@ def station_stats(df):
     time.sleep(0.2)
     print("Displaying next section in 5 seconds...")
     time.sleep(5)
+
 
 def trip_duration_stats(df):
     """Displays statistics on the total and average trip duration."""
@@ -227,7 +221,6 @@ def trip_duration_stats(df):
         df['Trip Duration'].sum(),
         df['Trip Duration'].sum()/3600))
 
-    # TO DO: display mean travel time
     print("Average travel time: {:.1f}s ({:.1f}min)".format(
         df['Trip Duration'].sum()/len(df),
         df['Trip Duration'].sum()/len(df)/60))
@@ -259,12 +252,10 @@ def user_stats(df):
 
     print("Youngest users: age {}".format(
         (int(time.strftime("%Y")) 
-         - int(df['Birth Year'].sort_values().max()))
-    ))
+         - int(df['Birth Year'].sort_values().max()))))
     print("Oldest users: age {}".format(
         (int(time.strftime("%Y"))
-         - int(df['Birth Year'].sort_values().min()))
-    ))
+         - int(df['Birth Year'].sort_values().min()))))
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
@@ -277,6 +268,7 @@ def main():
                   'march', 'april', 'may', 'june']
     day_list = ['monday', 'tuesday', 'wednesday', 'thursday',
                 'friday', 'saturday', 'sunday']
+    
     while True:
         city, month, day = get_filters(month_list, day_list)
         df = load_data(city, month, day, month_list, day_list)
@@ -287,6 +279,7 @@ def main():
         user_stats(df)
 
         restart = input('\nWould you like to view another? Enter yes or no.\n')
+
         if restart.lower() != 'yes':
             break
 
