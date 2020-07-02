@@ -15,3 +15,10 @@ Explore US Bikeshare Data
 ### Credits
 * To incorporate Python input() and time library's sleep() function to negate time delay:
 (https://stackoverflow.com/questions/50871649/pause-python-script-wait-for-key-press)
+
+### Updates & Revisions
+> 07.02.2020:
+  - Checked interactive mode
+  - Initial commit
+  - Ran pycodestyle to check formatting
+  - Refactored code in bikeshare.py to reduce print() and time.sleep() repetition
