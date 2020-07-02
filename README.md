@@ -1,15 +1,17 @@
-### Date created
-Include the date you created this project and README file.
+### Date created :date:
+July 2, 2020
 
-### Project Title
-Replace the Project Title
+### Project Title :floppy_disk:
+Explore US Bikeshare Data
 
-### Description
-Describe what your project is about and what it does
+### Description :mag_right:
+* A Python module that filters and displays U.S. bikeshare data (Chicago, New York City and Washington)
+* Managed and computed statistics of datasets via Pandas library
+* An interactive environment where the users may view requested data.
 
-### Files used
-Include the files used
+### Files used :file_folder:
+*new_york_city.csv, chicago.csv, washington.csv*
 
 ### Credits
-It's important to give proper credit. Add links to any repo that inspired you or blogposts you consulted.
-
+* To incorporate Python input() and time library's sleep() function to negate time delay:
+(https://stackoverflow.com/questions/50871649/pause-python-script-wait-for-key-press)
