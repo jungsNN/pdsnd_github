@@ -6,19 +6,22 @@ import numpy as np
 from collections import Counter
 
 
-CITY_DATA = { 'chicago': 'chicago.csv',
-              'new york city': 'new_york_city.csv',
-              'washington': 'washington.csv' }
+CITY_DATA = {'chicago': 'chicago.csv',
+             'new york city': 'new_york_city.csv',
+             'washington': 'washington.csv'}
 
 
 def get_filters(month_list, day_list):
     """
     Asks user to specify a city, month, and day to analyze.
 
+    #add params
     Returns:
         (str) city - name of the city to analyze
-        (str) month - name of the month to filter by, or "all" to apply no month filter
-        (str) day - name of the day of week to filter by, or "all" to apply no day filter
+        (str) month - name of the month to filter by, or "all" to apply
+            no month filter
+        (str) day - name of the day of week to filter by, or "all" to
+            apply no day filter
     """
     print('Hello! Let\'s explore some US bikeshare data!')
     time.sleep(1)
@@ -29,11 +32,11 @@ def get_filters(month_list, day_list):
         if " " in keys:
             names.append("".join([splits[0] for splits in keys.split(" ")]))
         citydict[keys] = names
-    
+        
     city = ""
     while city == "":
-        city_input = input("What city/cities would you like to view? \n").lower()
-        
+        city_input = (input("What city/cities would you like to view? \n")
+                      .lower())
         if city_input in CITY_DATA.keys():
             #city_input = ["".join([l for l in list(city_input)])]
             city += city_input
@@ -45,43 +48,59 @@ def get_filters(month_list, day_list):
             if city_input in CITY_DATA.keys():
                 city += city_input
             else:
-                print('Please choose from Chicago, New York City, or Washington.')
-
+                print('Please choose from \
+                      Chicago, \
+                      New York City, \
+                      or Washington.')
     print("You chose:", city)
-    time.sleep(0.5)
-                
+    time.sleep(0.3)
+    
     month = []
     while month == []:
-        month_input = input("What month(s) would you like to view? (January to June)\n").lower().replace(" ", "").split(",")
-
+        month_input = (
+            input("What month(s) would you like to view? [January-June]\n")
+            .lower()
+            .replace(" ", "")
+            .split(",")
+            )
         if "all" in month_input:
-            month.append("all")   
+            month.append("all")
         else:
             for m in month_input:
                 try:
-                    month.extend([month_list[i] for i in range(len(month_list)) if m in month_list[i]])
-                except:
+                    month.extend([month_list[i]
+                                  for i in range(len(month_list))
+                                  if m in month_list[i]])
+                except Exceptions as e:
                     print('Please choose from January through June, or "all".')
-                    
+                    pass
     print("You chose:", month)
-    time.sleep(0.5)
+    time.sleep(0.3)
     
     day = []
     while day == []:
-        day_input = input("Which day(s) of the week would you like to view?\n").lower().replace(" ", "").split(",")
-        
+        day_input = (
+            input("Which day(s) of the week would you like to view?\n")
+            .lower()
+            .replace(" ", "")
+            .split(",")
+            )
         if "all" in day_input:
             day.append("all") 
         else:
             for d in day_input:
                 try:
-                    day.extend([day_list[i] for i in range(len(day_list)) if d in day_list[i]])
+                    day.extend([day_list[i]
+                                for i in range(len(day_list))
+                                if d in day_list[i]])
                 except:
-                    print('Please choose from Monday through Sunday, or "all".')            
-        
+                    print('Please choose from \
+                          Monday through Sunday, \
+                          or "all".')            
     print("You chose:", day)
+    time.sleep(0.3)
+
     print('-'*40)
-    time.sleep(0.2)
     print("Displaying next section in 5...")
     time.sleep(4)
 
@@ -89,15 +108,18 @@ def get_filters(month_list, day_list):
 
 
 def load_data(city, month, day, month_list, day_list):
-    """
-    Loads data for the specified city and filters by month and day if applicable.
+    """Loads data for the specified city and filters by month and day
+    if applicable.
 
     Args:
         (str) city - name of the city to analyze
-        (str) month - name of the month to filter by, or "all" to apply no month filter
-        (str) day - name of the day of week to filter by, or "all" to apply no day filter
+        (str) month - name of the month to filter by,
+            or "all" to apply no month filter
+        (str) day - name of the day of week to filter by,
+            or "all" to apply no day filter
     Returns:
-        df - Pandas DataFrame containing city data filtered by month and day
+        df - Pandas DataFrame containing city data filtered by
+            month and day
     """
     df = pd.read_csv(CITY_DATA[city])
     df = df.sort_values(by='Trip Duration')
@@ -107,22 +129,22 @@ def load_data(city, month, day, month_list, day_list):
     df['month'] = df['Start Time'].dt.month
     df['day_of_week'] = df['Start Time'].dt.weekday
     
-    if all(df.isna()) ==  True:
-        pass
+    if all(df.isna()):
+        continue
     else:
         for col in df:
             try:
                 all(df[col].isna())
             except:
-                print("{} column has {} NaN".format(col, df[col].isna().sum().sum()))
-
+                print("{} column has {} NaN"
+                      .format(col, df[col].isna().sum().sum()))
+                
     print("Processing Data...")
     time.sleep(3)
     
     month_dict = {}
     for m in range(len(month_list)):
-        month_dict[month_list[m]] = m
-    
+        month_dict[month_list[m]] = m  
     if "all" not in month:
         select_month = [month_dict[m] for m in month]
         df = df.loc[df['month'].isin(select_month)]
@@ -142,7 +164,6 @@ def time_stats(df, month_list, day_list):
     
     print('\nCalculating The Most Frequent Times of Travel...\n')
     time.sleep(1)
-    
     start_time = time.time()
     
     df['hour'] = df['Start Time'].dt.hour
@@ -163,8 +184,9 @@ def time_stats(df, month_list, day_list):
         int(df['hour'].value_counts().values.sum())))
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
-    print('-'*40)
     time.sleep(0.2)
+
+    print('-'*40)
     print("Displaying next section in 5 seconds...")
     time.sleep(5)
           
@@ -174,7 +196,6 @@ def station_stats(df):
 
     print('\nCalculating The Most Popular Stations and Trip...\n')
     time.sleep(1)
-    
     start_time = time.time()
     
     start_stations = df['Start Station'].value_counts()
@@ -185,30 +206,33 @@ def station_stats(df):
     for combo in station_combo:
         combo = ' - '.join(combo)
         combo_list.append(combo)
-    combo_series = pd.Series(dict(Counter(combo_list))).sort_values(ascending=False)
-       
-    print("Top used start station =>  {}  ({} out of {})".format(
+
+    combo_series = pd.Series(dict(Counter(combo_list))
+                             .sort_values(ascending=False))
+    
+    print("Top used start station: {} ({} out of {})".format(
         start_stations.index[0],
         int(start_stations.max()),
         int(start_stations.values.sum())))
 
-    print("Top used end station =>  {}  ({} out of {})".format(
+    print("Top used end station: {} ({} out of {})".format(
         end_stations.index[0],
         int(end_stations.max()),
         int(end_stations.values.sum())))
 
-    print("Top used combination of start/end stations =>  {}  ({} out of {})".format(
-        combo_series.index[0],
-        int(combo_series.max()),
-        int(combo_series.values.sum())))
+    print("Top used combination of start/end stations: {} ({} out of {})"
+          .format(combo_series.index[0],
+                  int(combo_series.max()),
+                  int(combo_series.values.sum())))
     
     print("\nThis took %s seconds.\n" % round(time.time() - start_time, 3))
-    print('-'*40)
     time.sleep(0.2)
+    
+    print('-'*40)
     print("Displaying next section in 5 seconds...")
     time.sleep(5)
 
-
+    
 def trip_duration_stats(df):
     """Displays statistics on the total and average trip duration."""
 
@@ -217,23 +241,25 @@ def trip_duration_stats(df):
     
     start_time = time.time()
 
-    print("Total travel time: {:.1f}s ({:.1f}hr)".format(
-        df['Trip Duration'].sum(),
-        df['Trip Duration'].sum()/3600))
-
-    print("Average travel time: {:.1f}s ({:.1f}min)".format(
-        df['Trip Duration'].sum()/len(df),
-        df['Trip Duration'].sum()/len(df)/60))
+    print("Total travel time: {:.1f}s ({:.1f}hr)"
+          .format(df['Trip Duration'].sum(),
+                  df['Trip Duration'].sum()/3600))
+    
+    print("Average travel time: {:.1f}s ({:.1f}min)"
+          .format(df['Trip Duration'].sum()/len(df),
+                  df['Trip Duration'].sum()/len(df)/60))
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
-    print('-'*40)
     time.sleep(0.2)
+    
+    print('-'*40)
     print("Displaying next section in 5 seconds...")
     time.sleep(5)
 
+
 def user_stats(df):
     """Displays statistics on bikeshare users."""
-
+    
     print('\nCalculating User Stats...\n')
     time.sleep(1)
     
@@ -253,21 +279,22 @@ def user_stats(df):
     print("Youngest users: age {}".format(
         (int(time.strftime("%Y")) 
          - int(df['Birth Year'].sort_values().max()))))
-    print("Oldest users: age {}".format(
-        (int(time.strftime("%Y"))
-         - int(df['Birth Year'].sort_values().min()))))
+    print("Oldest users: age {}"
+          .format((int(time.strftime("%Y"))-int(df['Birth Year']
+                                                .sort_values().min()))))
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
-    print('-'*40)
     time.sleep(0.2)
+    
+    print('-'*40)
     print("Data display complete.")
 
-
+    
 def main():
-    month_list = ['all', 'january', 'february', 
+    month_list = ['all', 'january', 'february',
                   'march', 'april', 'may', 'june']
-    day_list = ['monday', 'tuesday', 'wednesday', 'thursday',
-                'friday', 'saturday', 'sunday']
+    day_list = ['monday', 'tuesday', 'wednesday',
+                'thursday', 'friday', 'saturday', 'sunday']
     
     while True:
         city, month, day = get_filters(month_list, day_list)
