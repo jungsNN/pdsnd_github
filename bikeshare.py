@@ -158,17 +158,21 @@ def load_data(city, month, day, month_list, day_list):
     df = df.sort_values(by='Trip Duration')
 
     df['Start Time'] = pd.to_datetime(df['Start Time'])
-    df['Birth Year'].fillna(method='ffill', axis=0, inplace=True)
-    df['Gender'].fillna(method='ffill', axis=0, inplace=True)
     df['month'] = df['Start Time'].dt.month
     df['day_of_week'] = df['Start Time'].dt.weekday
+
+    if 'Gender' in df.columns:
+        df['Birth Year'].fillna(method='ffill', axis=0, inplace=True)
+        df['Gender'].fillna(method='ffill', axis=0, inplace=True)
 
     if all(df.isna()):
         continue
     else:
         for col in df:
+            if df[col].isna().sum().sum() != 0:
             try:
-                all(df[col].isna())
+                df[col].fillna(method='ffill', axis=0, inplace=True)
+                df[col].isna().sum().sum() == 0
             except Exception as e:
                 print("{} column has {} NaN"
                       .format(col, df[col].isna().sum().sum()))
@@ -520,6 +524,31 @@ def load_data(city, month, day, month_list, day_list):
 
     return df
 
+def display_data(df):
+    """Displays raw dataset 5 rows at a time upon user's request."""
+
+    show_ask = input("Would you like to view the raw data? \n\
+        (press enter to view 5 rows at a time, 'q' to pass)\n")
+
+    if show_ask == "\\n":
+        row_counter = 0
+
+        while len(df) >= 0:
+            if row_counter > (len(df)-5):
+                print(df[row_counter:])
+                break
+
+            print(df[row_counter:row_counter+5])
+
+            show_ask = input("Enter key to view next 5 rows/'q' to end: ")
+
+            if show_ask == "\\n":
+                row_counter += 5
+                len(df) -= 5
+            elif show_ask == "q":
+                len(df) = -1
+                break
+
 
 def time_stats(df, month_list, day_list):
     """Displays statistics on the most frequent times of travel."""
@@ -667,8 +696,11 @@ def main():
         station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
+        display_data(df)
 
-        restart = input('\nWould you like to view another? Enter yes or no.\n')
+        restart = input('\n \
+                        Would you like to view different city/date data? \
+                        Enter yes or no.\n')
 
         if restart.lower() != 'yes':
             break
