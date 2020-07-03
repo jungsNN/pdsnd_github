@@ -10,19 +10,22 @@ CITY_DATA = {'chicago': 'chicago.csv',
              'washington': 'washington.csv'}
 
 
-def print_pause(string, n):
+def print_pause(string=None, t=1):
     """Delays next display for n seconds using time.sleep() function.
 
     Parameters
     ----------
-    string (str):
+    string (str): default=None
         string value to print out
 
-    n (int):
+    t (int): default=1s
         number of seconds to pass into sleep.time() function
     """
+    string = string
+    t = t
+
     print(string)
-    time.sleep(g)
+    time.sleep(t)
 
 
 def get_filters(month_list, day_list):
@@ -97,7 +100,6 @@ def get_filters(month_list, day_list):
                                   if m in month_list[i]])
                 except Exceptions as e:
                     print('Please choose from January through June, or "all".')
-                    pass
 
     print_pause(("You chose:", month), 0.3)
 
@@ -121,12 +123,11 @@ def get_filters(month_list, day_list):
                     print('Please choose from \
                           Monday through Sunday, \
                           or "all".')
-                    pass
 
     print_pause(("You chose:", day), 0.3)
 
     print('-'*40)
-    print_pause("Displaying next section in 5...", 4)
+    print_pause("Displaying next section in 3 second...", 3)
 
     return city, month, day
 
@@ -153,18 +154,24 @@ def load_data(city, month, day, month_list, day_list):
         month and day
     """
     df = pd.read_csv(CITY_DATA[city])
-    df = df.sort_values(by='Trip Duration')
-
+    df = df.iloc[:,1:]
     df['Start Time'] = pd.to_datetime(df['Start Time'])
     df['month'] = df['Start Time'].dt.month
     df['day_of_week'] = df['Start Time'].dt.weekday
 
+    
+    df = df.sort_values(by='Trip Duration')
+
     if 'Gender' in df.columns:
-        df['Birth Year'].fillna(method='ffill', axis=0, inplace=True)
         df['Gender'].fillna(method='ffill', axis=0, inplace=True)
 
+    if 'Birth Year' in df.columns:
+        df['Birth Year'].fillna(method='ffill', axis=0, inplace=True)
+
+    df = df.reset_index()  
+
     if all(df.isna()):
-        continue
+        print_pause("Processing Data...", 1)
     else:
         for col in df:
             if df[col].isna().sum().sum() != 0:
@@ -174,14 +181,12 @@ def load_data(city, month, day, month_list, day_list):
                 except Exception as e:
                     print("{} column has {} NaN"
                           .format(col, df[col].isna().sum().sum()))
-                    pass
 
-    print("Processing Data...")
-    time.sleep(3)
+        print_pause("Processing Data...", 1)
 
     month_dict = {}
     for m in range(len(month_list)):
-        month_dict[month_list[m]] = m
+        month_dict[month_list[m]] = m+1
 
     if "all" not in month:
         select_month = [month_dict[m] for m in month]
@@ -189,7 +194,7 @@ def load_data(city, month, day, month_list, day_list):
 
     day_dict = {}
     for d in range(len(day_list)):
-        day_dict[day_list[d]] = d+1
+        day_dict[day_list[d]] = d
 
     if "all" not in day:
         select_day = [day_dict[d] for d in day]
@@ -201,28 +206,31 @@ def load_data(city, month, day, month_list, day_list):
 def display_data(df):
     """Displays raw dataset 5 rows at a time upon user's request."""
 
-    show_ask = input("Would you like to view the raw data? \n\
-        (press enter to view 5 rows at a time, 'q' to pass)\n")
-
-    if show_ask == "\\n":
-        row_counter = 0
-
-        while len(df) >= 0:
-            if row_counter > (len(df)-5):
+    column_names = list(df.columns)
+    show_ask = input(("Would you like to view the raw data?\n \
+                     (press 'y' to view 5 rows at a time, 'q' to pass)\n")).lower()
+    len_df = len(df)
+    row_counter = 0
+    if 'y' in show_ask:
+        while len_df >= 0:
+            if len(df)-row_counter <= 4:
                 print(df[row_counter:])
+                len_df = -1
                 break
+            else:
+                print(df[row_counter:row_counter+5])
 
-            print(df[row_counter:row_counter+5])
+            show_ask = (input("Press 'y' to view next \5 rows/'q' to end: ")
+                        .lower())
 
-            show_ask = input("Enter key to view next 5 rows/'q' to end: ")
-
-            if show_ask == "\\n":
+            if 'q' in show_ask:
+                len_df = -1
+                break
+            elif 'y' in show_ask:
                 row_counter += 5
-                len(df) -= 5
-            elif show_ask == "q":
-                len(df) = -1
-                break
+            len_df -= 5
 
+        show_ask = 'q'
 
 def time_stats(df, month_list, day_list):
     """Displays statistics on the most frequent times of travel.
@@ -240,25 +248,25 @@ def time_stats(df, month_list, day_list):
     df['hour'] = df['Start Time'].dt.hour
 
     print("Most common month: {} ({} out of {})".format(
-        month_list[int(df['month'].value_counts().index[0])].upper(),
+        month_list[int(df['month'].value_counts().index[0])-1].upper(),
         int(df['month'].value_counts().max()),
-        int(df['month'].value_counts().values.sum())))
+        int(df['month'].value_counts().sum())))
 
     print("Most common day of week: {} ({} out of {})".format(
         day_list[int(df['day_of_week'].value_counts().index[0])].upper(),
         int(df['day_of_week'].value_counts().max()),
-        int(df['day_of_week'].value_counts().values.sum())))
+        int(df['day_of_week'].value_counts().sum())))
 
     print("Most popular start hour: {}:00 ({} out of {})".format(
         int(df['hour'].value_counts().index[0]),
         int(df['hour'].value_counts().max()),
-        int(df['hour'].value_counts().values.sum())))
+        int(df['hour'].value_counts().sum())))
 
     print_pause(("\nThis took %s seconds." %
                  round(time.time() - start_time, 3)), 0.2)
 
     print('-'*40)
-    print_pause("Displaying next section in 5 seconds...", 5)
+    print_pause("Displaying next section in 3 seconds...", 3)
 
 
 def station_stats(df):
@@ -277,8 +285,8 @@ def station_stats(df):
         combo = ' - '.join(combo)
         combo_list.append(combo)
 
-    combo_series = pd.Series(dict(Counter(combo_list))
-                             .sort_values(ascending=False))
+    combo_series = pd.Series(dict(Counter(combo_list)))
+    combo_series = combo_series.sort_values(ascending=False)
 
     print("Top used start station: {} ({} out of {})"
           .format(start_stations.index[0],
@@ -297,7 +305,7 @@ def station_stats(df):
                  round(time.time() - start_time, 3)), 0.3)
 
     print('-'*40)
-    print_pause("Displaying next section in 5 seconds...", 5)
+    print_pause("Displaying next section in 3 seconds...", 3)
 
 
 def trip_duration_stats(df):
@@ -318,7 +326,7 @@ def trip_duration_stats(df):
                  round(time.time() - start_time, 3)), 0.2)
 
     print('-'*40)
-    print_pause("Displaying next section in 5 seconds...", 5)
+    print_pause("Displaying next section in 3 seconds...", 3)
 
 
 def user_stats(df):
@@ -330,24 +338,24 @@ def user_stats(df):
     start_time = time.time()
 
     user_count = df['User Type'].value_counts()
-    gender_count = df['Gender'].value_counts()
+
+    if 'Gender' in df.columns:
+        gender_count = df['Gender'].value_counts()
+        for g in range(len(gender_count)):
+            print("{} {}s".format(gender_count[g], gender_count.index[g]))
+
+    if 'Birth Year' in df.columns:
+        print("Youngest users: age {}"
+              .format((int(time.strftime("%Y"))-int(df['Birth Year']
+                                                    .sort_values()
+                                                    .max()))))
+        print("Oldest users: age {}"
+              .format((int(time.strftime("%Y"))-int(df['Birth Year']
+                                                    .sort_values()
+                                                    .min()))))
 
     for u in range(len(user_count)):
         print("{} {}s".format(user_count[u], user_count.index[u]))
-
-    print("\n")
-
-    for g in range(len(gender_count)):
-        print("{} {}s".format(gender_count[g], gender_count.index[g]))
-
-    print("\n")
-
-    print("Youngest users: age {}".format(
-        (int(time.strftime("%Y"))
-         - int(df['Birth Year'].sort_values().max()))))
-    print("Oldest users: age {}"
-          .format((int(time.strftime("%Y"))-int(df['Birth Year']
-                                                .sort_values().min()))))
 
     print_pause(("\nThis took %s seconds." %
                  round(time.time() - start_time, 3)), 0.3)
@@ -357,8 +365,8 @@ def user_stats(df):
 
 
 def main():
-    month_list = ['all', 'january', 'february',
-                  'march', 'april', 'may', 'june']
+    month_list = ['january', 'february', 'march',
+                  'april', 'may', 'june']
     day_list = ['monday', 'tuesday', 'wednesday',
                 'thursday', 'friday', 'saturday', 'sunday']
 
